@@ -1,7 +1,7 @@
 from ULA_NF import *
 
 if __name__ == "__main__":
-    ULA_NF_test = ULA_NF(problem = 'deblurring', noise_variance = 0.0004, step_size = 5e-5, alpha = 1.5, sample_size = 21000, figure_name = 'face4', load_observation = True, projection_C = 100.0, lambda_Moreau = 5)
+    ULA_NF_test = ULA_NF(problem = 'deblurring', noise_variance = 0.0004, step_size = 5e-5, alpha = 1.5, sample_size = 21000, figure_name = 'face4', load_observation = True, projection_C = 100.0, lambda_Moreau = 5e-5)
 
     pt_NF = "./glow_pytorch_rosinality/checkpoint/model_000212.pt"
     ULA_NF_test.NF_Lipschitz_estimation(load_pt = pt_NF)

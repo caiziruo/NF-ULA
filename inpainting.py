@@ -1,7 +1,7 @@
 from ULA_NF import *
 
 if __name__ == "__main__":
-    ULA_NF_test = ULA_NF(problem = 'inpainting', noise_variance = 0.0004, step_size = 5e-5, alpha = 2.0, sample_size = 10000, figure_name = 'face4', load_observation = True, projection_C = 100.0, lambda_Moreau = 5)
+    ULA_NF_test = ULA_NF(problem = 'inpainting', noise_variance = 0.0004, step_size = 5e-5, alpha = 2.0, sample_size = 10000, figure_name = 'face4', load_observation = True, projection_C = 100.0, lambda_Moreau = 5e-5)
         
     pt_NF = "./glow_pytorch_rosinality/checkpoint/model_000212.pt"
     # ULA_NF_test.ULA_NF_sample(start_from = "observation.pt", save_samples = False, load_pt = pt_NF) # 
