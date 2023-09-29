@@ -73,7 +73,7 @@ class ULA_NF(object):
         if len(self.OriginalFigure.shape) == 2: self.OriginalFigure = self.OriginalFigure.unsqueeze(dim = 0)
         self.channels, self.height, self.width = self.OriginalFigure.shape
         self.OriginalFigure             = self.OriginalFigure.unsqueeze(dim = 0).to(device) / 255.0
-        print(self.OriginalFigure.shape)
+        print("Original image size: ", self.OriginalFigure.shape)
 
         self.noise_variance 			= noise_variance
         self.step_size 			    	= step_size
@@ -149,7 +149,7 @@ class ULA_NF(object):
 
         # ############################## Load the observation 
         self.observation = torch.load(self.path + 'observation.pt').to(device)
-        print(self.observation.shape)
+        print("Observation size: ", self.observation.shape)
         
         # ############################## define the data fidelity.
         self.phi  = lambda x: torch.sum( (self.A(x) - self.observation)**2 ) / (2.0 * self.noise_variance)
@@ -624,23 +624,43 @@ class ULA_NF(object):
 
     
 
-    def ACF(self):
+    def ACF(self, wavelet = False):
         dir = self.path + '/acf'
         for f in os.listdir(dir):
-            os.remove(os.path.join(dir, f))
+            if f.endswith('.png'):
+                os.remove(os.path.join(dir, f))
+
         lags = range(100)
         if self.problem == 'deblurring': lags = range(100)
         elif self.problem == 'inpainting': lags = range(100)
         elif self.problem == 'CT_Gaussian_noise' or self.problem == 'CT_Poisson_noise': lags = range(2000)
 
-        samples_ULA_NF  = np.array(torch.load(self.path + 'samples/ULA_NF_Samples.pt') )
-        samples_PnP_ULA = np.array(torch.load(self.path + 'samples/PnP_ULA_Samples.pt'))
+        samples_ULA_NF = torch.load(self.path + 'samples/ULA_NF_Samples.pt') 
+        samples_PnP_ULA = torch.load(self.path + 'samples/PnP_ULA_Samples.pt')
         
+        acf_height = self.height
+        acf_width = self.width
+
+        J = 1
+        if wavelet:
+            from pytorch_wavelets import DWTForward, DWTInverse # (or import DWT, IDWT)
+            xfm = DWTForward(J=J, wave='db3', mode='zero')
+            samples_ULA_NF, _ = xfm(samples_ULA_NF)
+            samples_PnP_ULA, _ = xfm(samples_PnP_ULA)
+            # print(samples_ULA_NF.shape)
+            # utils.save_image( Yl, self.path + 'wavelet_Yl.png', normalize=False)
+
+            acf_height /= 2**J
+            acf_width /= 2**J
+        
+        samples_ULA_NF  = np.array(samples_ULA_NF)
+        samples_PnP_ULA = np.array(samples_PnP_ULA)
+
         import statsmodels.api as sm
         import matplotlib.pyplot as plt
         for k in range(500):
-            i = random.randint(0, self.height - 1)
-            j = random.randint(0, self.width - 1)
+            i = random.randint(1, acf_height - 2)
+            j = random.randint(1, acf_width - 2)
             acorr_ULA_NF  = sm.tsa.acf(samples_ULA_NF[:, 0, i, j],  nlags = len(lags)-1)
             acorr_PnP_ULA = sm.tsa.acf(samples_PnP_ULA[:, 0, i, j], nlags = len(lags)-1)
             
