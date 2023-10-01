@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # ULA_NF_test.PnP_ULA_DRUnet_sample(start_from = "sample_PnP_ULA.pt", save_samples = False, save_samples_size = 10000, load_pt = 'DPIR/model_zoo/drunet_color.pth') # 
     # ULA_NF_test.Quantification(samples = 'samples/PnP_ULA_DRUnet_Samples.pt', colorbar_range = 0.08, algorithm = 'PnP_ULA', network = 'DRUnet')
     
-    # ULA_NF_test.ACF(wavelet = True)
+    # ULA_NF_test.ACF(wavelet = True, wavelet_type = 'YL', samples_NF = 'samples/ULA_NF_Samples.pt', samples_PnP = 'samples/PnP_ULA_Samples.pt')
     # ULA_NF_test.evolution_PSNR()
 
 # './Provable_Plug_and_Play/training/logs/2023-01-04/DnCNN_Sigma5_17Layers_modeS_LipConst/epoch10_noise5_PSNR40.57_SSIM0.98.pth'

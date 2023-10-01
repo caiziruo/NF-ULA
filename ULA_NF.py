@@ -694,7 +694,7 @@ class ULA_NF(object):
         # plt.savefig(self.path + '/PSNR_x_mmse_time.png')
         # plt.close()
 
-    def ACF(self, wavelet = False):
+    def ACF(self, wavelet = False, wavelet_type = 'YL', samples_NF = 'samples/ULA_NF_Samples.pt', samples_PnP = 'samples/PnP_ULA_Samples.pt'):
         dir = self.path + '/acf'
         for f in os.listdir(dir):
             if f.endswith('.png'):
@@ -702,26 +702,35 @@ class ULA_NF(object):
 
         lags = range(100)
         if self.problem == 'deblurring': lags = range(100)
-        elif self.problem == 'inpainting': lags = range(100)
+        elif self.problem == 'inpainting': lags = range(200)
         elif self.problem == 'CT_Gaussian_noise' or self.problem == 'CT_Poisson_noise': lags = range(2000)
 
-        samples_ULA_NF = torch.load(self.path + 'samples/ULA_NF_Samples.pt') 
-        samples_PnP_ULA = torch.load(self.path + 'samples/PnP_ULA_Samples.pt')
+        samples_ULA_NF = torch.load(self.path + samples_NF)
+        samples_PnP_ULA = torch.load(self.path + samples_PnP)
         
         acf_height = self.height
         acf_width = self.width
 
-        J = 1
+        J = 3
         if wavelet:
             from pytorch_wavelets import DWTForward, DWTInverse # (or import DWT, IDWT)
             xfm = DWTForward(J=J, wave='db3', mode='zero')
-            samples_ULA_NF, _ = xfm(samples_ULA_NF)
-            samples_PnP_ULA, _ = xfm(samples_PnP_ULA)
-            # print(samples_ULA_NF.shape)
-            # utils.save_image( Yl, self.path + 'wavelet_Yl.png', normalize=False)
+            if wavelet_type == 'YL':
+                samples_ULA_NF, _ = xfm(samples_ULA_NF) # YL
+                samples_PnP_ULA, _ = xfm(samples_PnP_ULA) # YL
+            elif wavelet_type == 'YH':
+                _, samples_ULA_NF = xfm(samples_ULA_NF) # YH: LH, HL, HH
+                samples_ULA_NF = samples_ULA_NF[0][:, :, 0, :, :]
+                _, samples_PnP_ULA = xfm(samples_PnP_ULA) # YH: LH, HL, HH
+                samples_PnP_ULA = samples_PnP_ULA[0][:, :, 0, :, :]
+            else:
+                raise Exception("Wavelet_type should be YL or YH.")
 
-            acf_height /= 2**J
-            acf_width /= 2**J
+            print(samples_ULA_NF.shape)
+            print(samples_PnP_ULA.shape)
+
+            acf_height = int(acf_height / 2**J)
+            acf_width = int(acf_width / 2**J)
         
         samples_ULA_NF  = np.array(samples_ULA_NF)
         samples_PnP_ULA = np.array(samples_PnP_ULA)
