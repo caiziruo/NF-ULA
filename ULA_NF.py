@@ -11,7 +11,7 @@ import os
 import sys
 import os.path
 import math
-os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 3, 7"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1, 2, 3, 7"
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
@@ -241,7 +241,7 @@ class ULA_NF(object):
             ############################## For Glow-rosinality, input images should be in [-0.5, 0.5]
             gradient_log_prior      = gradient_log_density(X_current_requires_grad, net)
             projection_C            = 1 * ( torch.clamp(X_current, min = -(self.projection_C - 1), max = self.projection_C) - X_current ) / self.lambda_Moreau
-            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior ) + projection_C + random_walk
+            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior + projection_C) + random_walk
 
             if n % 100 == 0: 
                 data_term = self.phi(X_current)
@@ -252,7 +252,7 @@ class ULA_NF(object):
                 torch.max(X_current).cpu().detach().numpy(), "\t",
                 torch.min(X_current).cpu().detach().numpy())
 
-            #  record the last 10000 samples
+            #  record the last save_samples_size samples
             if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
             X_posterior_mean += X_next.detach()
             
@@ -325,7 +325,7 @@ class ULA_NF(object):
             gradient_log_likelihood = gradient_data_fidelity(X_current_requires_grad, net)
             gradient_log_prior      = gradient_log_density(X_current_requires_grad, net)
             projection_C            = 1 * ( torch.clamp(X_current, min = -(self.projection_C - 1), max = self.projection_C) - X_current ) / self.lambda_Moreau
-            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior ) + projection_C + random_walk
+            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior + projection_C) + random_walk
 
             if n % 100 == 0: 
                 data_term = self.phi(X_current)
@@ -336,7 +336,7 @@ class ULA_NF(object):
                 torch.max(X_current).cpu().detach().numpy(), "\t",
                 torch.min(X_current).cpu().detach().numpy())
 
-            #  record the last 10000 samples
+            #  record the last save_samples_size samples
             if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
             X_posterior_mean += X_next.detach()
             
@@ -386,7 +386,7 @@ class ULA_NF(object):
             X_output = torch.clamp( X_output, 0., 1.)
             gradient_log_prior      = ( X_output - X_current )  / (5. / 255.)**2
             projection_C            = 1 * ( torch.clamp(X_current, min = -(self.projection_C - 1), max = self.projection_C) - X_current ) / self.lambda_Moreau
-            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior ) + projection_C + random_walk
+            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior + projection_C) + random_walk
 
             if n % 100 == 0: 
                 data_term = self.phi(X_current)
@@ -397,7 +397,7 @@ class ULA_NF(object):
                 torch.max(X_current).cpu().detach().numpy(), "\t",
                 torch.min(X_current).cpu().detach().numpy())
 
-            #  record the last 10000 samples
+            #  record the last save_samples_size samples
             if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
             X_posterior_mean += X_next.detach()
             
@@ -448,7 +448,7 @@ class ULA_NF(object):
             X_output = torch.clamp( X_output, 0., 1.)
             gradient_log_prior      = ( X_output - X_current )  / (5. / 255.)**2
             projection_C            = 1 * ( torch.clamp(X_current, min = -(self.projection_C - 1), max = self.projection_C) - X_current ) / self.lambda_Moreau
-            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior ) + projection_C + random_walk
+            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior + projection_C) + random_walk
             # X_next                  = torch.clamp(X_next, min = -1.0, max = 2.0) 
 
             if n % 100 == 0: 
@@ -460,7 +460,7 @@ class ULA_NF(object):
                 torch.max(X_current).cpu().detach().numpy(), "\t",
                 torch.min(X_current).cpu().detach().numpy())
 
-            #  record the last 10000 samples
+            #  record the last save_samples_size samples
             if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
             X_posterior_mean += X_next.detach()
             
@@ -512,7 +512,7 @@ class ULA_NF(object):
             X_output = torch.clamp( X_output, 0., 1.)
             gradient_log_prior      = ( X_output - X_current )  / (5. / 255.)**2
             projection_C            = 1 * ( torch.clamp(X_current, min = -(self.projection_C - 1), max = self.projection_C) - X_current ) / self.lambda_Moreau
-            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior ) + projection_C + random_walk
+            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior + projection_C) + random_walk
 
             if n % 100 == 0: 
                 data_term = self.phi(X_current)
@@ -523,7 +523,7 @@ class ULA_NF(object):
                 torch.max(X_current).cpu().detach().numpy(), "\t",
                 torch.min(X_current).cpu().detach().numpy())
 
-            #  record the last 10000 samples
+            #  record the last save_samples_size samples
             if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
             X_posterior_mean += X_next.detach()
             
@@ -599,7 +599,7 @@ class ULA_NF(object):
             X_current_requires_grad = X_current.clone().detach().requires_grad_()
             gradient_log_likelihood = gradient_data_fidelity(X_current_requires_grad, model)
             projection_C            = 1 * ( torch.clamp(X_current, min = -(self.projection_C - 1), max = self.projection_C) - X_current ) / self.lambda_Moreau
-            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior ) + projection_C + random_walk
+            X_next = X_current + self.step_size * ( gradient_log_likelihood + self.alpha * gradient_log_prior + projection_C) + random_walk
 
             if n % 100 == 0: 
                 data_term = self.phi(X_current)
@@ -610,7 +610,7 @@ class ULA_NF(object):
                 torch.max(X_current).cpu().detach().numpy(), "\t",
                 torch.min(X_current).cpu().detach().numpy())
 
-            #  record the last 10000 samples
+            #  record the last save_samples_size samples
             if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
             X_posterior_mean += X_next.detach()
             
