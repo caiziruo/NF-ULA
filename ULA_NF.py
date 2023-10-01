@@ -11,7 +11,7 @@ import os
 import sys
 import os.path
 import math
-os.environ["CUDA_VISIBLE_DEVICES"] = "0, 3, 6, 7"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 3, 7"
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
@@ -201,9 +201,10 @@ class ULA_NF(object):
 
 
     
-    def ULA_NF_sample(self, start_from, save_samples, load_pt):
+    def ULA_NF_sample(self, start_from, save_samples, save_samples_size, load_pt):
         # X_current = torchvision.io.read_image(self.path + start_from).type(torch.float32).unsqueeze(dim = 0).to(device)
         X_current = torch.load(self.path + start_from).to(device)
+        X_posterior_mean = torch.zeros_like(X_current)
         samples = []
         
         ###################################################################### Initialize the net
@@ -252,7 +253,8 @@ class ULA_NF(object):
                 torch.min(X_current).cpu().detach().numpy())
 
             #  record the last 10000 samples
-            if (n >= self.sample_size - 10000 and save_samples): samples.append( X_next.cpu().detach() )
+            if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
+            X_posterior_mean += X_next.detach()
             
             X_current = X_next.clone().detach()
             if (n % 1000 == 0 and save_samples):
@@ -262,14 +264,18 @@ class ULA_NF(object):
         end = time.time()
         print("time: ", end - start)
 
+        X_posterior_mean /= self.sample_size
+        print("posterior mean psnr  ", psnr(  X_posterior_mean.squeeze(), self.OriginalFigure.squeeze() ) )
+
         if save_samples:
             samples = torch.cat( samples, dim = 0)
             torch.save(samples, self.path + 'samples/ULA_NF_Samples.pt')
         return 0
 
-    def ULA_NF_CT_sample(self, start_from, save_samples, load_pt):
+    def ULA_NF_CT_sample(self, start_from, save_samples, save_samples_size, load_pt):
         # X_current = torchvision.io.read_image(self.path + start_from).type(torch.float32).unsqueeze(dim = 0).to(device) / 255.0
         X_current = torch.load(self.path + start_from).to(device)
+        X_posterior_mean = torch.zeros_like(X_current)
         samples = []
 
         ###################################################################### Initialize the net
@@ -331,7 +337,8 @@ class ULA_NF(object):
                 torch.min(X_current).cpu().detach().numpy())
 
             #  record the last 10000 samples
-            if (n >= self.sample_size - 10000 and save_samples): samples.append( X_next.cpu().detach() )
+            if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
+            X_posterior_mean += X_next.detach()
             
             X_current = X_next.clone().detach()
             if (n % 1000 == 0 and save_samples):
@@ -341,14 +348,18 @@ class ULA_NF(object):
         end = time.time()
         print("time: ", end - start)
 
+        X_posterior_mean /= self.sample_size
+        print("posterior mean psnr  ", psnr(  X_posterior_mean.squeeze(), self.OriginalFigure.squeeze() ) )
+
         if save_samples:
             samples = torch.cat( samples, dim = 0)
             torch.save(samples, self.path + 'samples/ULA_NF_Samples.pt')
         return 0
 
-    def PnP_ULA_sample(self, start_from, save_samples, load_pt):
+    def PnP_ULA_sample(self, start_from, save_samples, save_samples_size, load_pt):
         # X_current = torchvision.io.read_image(self.path + start_from).type(torch.float32).unsqueeze(dim = 0).to(device)
         X_current = torch.load(self.path + start_from).to(device)
+        X_posterior_mean = torch.zeros_like(X_current)
         samples = []
 
         ###################################################################### Initialize the net
@@ -387,7 +398,8 @@ class ULA_NF(object):
                 torch.min(X_current).cpu().detach().numpy())
 
             #  record the last 10000 samples
-            if (n >= self.sample_size - 10000 and save_samples): samples.append( X_next.cpu().detach() )
+            if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
+            X_posterior_mean += X_next.detach()
             
             X_current = X_next.clone().detach()
             if (n % 1000 == 0 and save_samples):
@@ -397,14 +409,18 @@ class ULA_NF(object):
         end = time.time()
         print("time: ", end - start)
 
+        X_posterior_mean /= self.sample_size
+        print("posterior mean psnr  ", psnr(  X_posterior_mean.squeeze(), self.OriginalFigure.squeeze() ) )
+
         if save_samples:
             samples = torch.cat( samples, dim = 0)
             torch.save(samples, self.path + 'samples/PnP_ULA_Samples.pt')
         return 0
 
-    def PnP_ULA_DnCNN_sample(self, start_from, save_samples, load_pt):
+    def PnP_ULA_DnCNN_sample(self, start_from, save_samples, save_samples_size, load_pt):
         # X_current = torchvision.io.read_image(self.path + start_from).type(torch.float32).unsqueeze(dim = 0).to(device)
         X_current = torch.load(self.path + start_from).to(device)
+        X_posterior_mean = torch.zeros_like(X_current)
         samples = []
 
         ###################################################################### Initialize the net
@@ -445,7 +461,8 @@ class ULA_NF(object):
                 torch.min(X_current).cpu().detach().numpy())
 
             #  record the last 10000 samples
-            if (n >= self.sample_size - 10000 and save_samples): samples.append( X_next.cpu().detach() )
+            if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
+            X_posterior_mean += X_next.detach()
             
             X_current = X_next.clone().detach()
             if (n % 1000 == 0 and save_samples):
@@ -455,14 +472,18 @@ class ULA_NF(object):
         end = time.time()
         print("time: ", end - start)
 
+        X_posterior_mean /= self.sample_size
+        print("posterior mean psnr  ", psnr(  X_posterior_mean.squeeze(), self.OriginalFigure.squeeze() ) )
+
         if save_samples:
             samples = torch.cat( samples, dim = 0)
             torch.save(samples, self.path + 'samples/PnP_ULA_DnCNN_Samples.pt')
         return 0
     
-    def PnP_ULA_DRUnet_sample(self, start_from, save_samples, load_pt):
+    def PnP_ULA_DRUnet_sample(self, start_from, save_samples, save_samples_size, load_pt):
         # X_current = torchvision.io.read_image(self.path + start_from).type(torch.float32).unsqueeze(dim = 0).to(device)
         X_current = torch.load(self.path + start_from).to(device)
+        X_posterior_mean = torch.zeros_like(X_current)
         samples = []
 
         ###################################################################### Initialize the net
@@ -503,7 +524,8 @@ class ULA_NF(object):
                 torch.min(X_current).cpu().detach().numpy())
 
             #  record the last 10000 samples
-            if (n >= self.sample_size - 10000 and save_samples): samples.append( X_next.cpu().detach() )
+            if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
+            X_posterior_mean += X_next.detach()
             
             X_current = X_next.clone().detach()
             if (n % 1000 == 0 and save_samples):
@@ -513,12 +535,15 @@ class ULA_NF(object):
         end = time.time()
         print("time: ", end - start)
 
+        X_posterior_mean /= self.sample_size
+        print("posterior mean psnr  ", psnr(  X_posterior_mean.squeeze(), self.OriginalFigure.squeeze() ) )
+
         if save_samples:
             samples = torch.cat( samples, dim = 0)
             torch.save(samples, self.path + 'samples/PnP_ULA_DRUnet_Samples.pt')
         return 0
 
-    def PnP_ULA_CT_sample(self, start_from, save_samples, load_pt):
+    def PnP_ULA_CT_sample(self, start_from, save_samples, save_samples_size, load_pt):
         ######################################################################
         #################### DnCNN without Lipschitz condition.
         # sys.path.append('./KAIR')
@@ -556,6 +581,7 @@ class ULA_NF(object):
 
         # X_current = torchvision.io.read_image(self.path + 'posterior_mean_PnP_ULA.png').type(torch.float32).unsqueeze(dim = 0).to(device)
         X_current = torch.load(self.path + start_from).to(device)
+        X_posterior_mean = torch.zeros_like(X_current)
         samples = []
 
         print("Start drawing ", self.sample_size, " samples!")
@@ -585,7 +611,8 @@ class ULA_NF(object):
                 torch.min(X_current).cpu().detach().numpy())
 
             #  record the last 10000 samples
-            if (n >= self.sample_size - 10000 and save_samples): samples.append( X_next.cpu().detach() )
+            if (n >= self.sample_size - save_samples_size and save_samples): samples.append( X_next.cpu().detach() )
+            X_posterior_mean += X_next.detach()
             
             X_current = X_next.clone().detach()
             if (n % 1000 == 0 and save_samples):
@@ -594,6 +621,9 @@ class ULA_NF(object):
 
         end = time.time()
         print("time: ", end - start)
+
+        X_posterior_mean /= self.sample_size
+        print("posterior mean psnr  ", psnr(  X_posterior_mean.squeeze(), self.OriginalFigure.squeeze() ) )
 
         if save_samples:
             samples = torch.cat( samples, dim = 0)
@@ -618,11 +648,51 @@ class ULA_NF(object):
             plt.close()
             # utils.save_image( samples_std[i, :, :], self.path + 'std_ULA_NF' + str(i) + '.png', normalize=True)
         posterior_mean = torch.mean(samples, dim = 0)
-        print(  "ULA NF posterior mean psnr  ", psnr(  posterior_mean, self.OriginalFigure.squeeze() ) )
+        print(algorithm,  "posterior mean psnr  ", psnr(  posterior_mean, self.OriginalFigure.squeeze() ) )
         utils.save_image( posterior_mean, self.path + 'posterior_mean_' + algorithm + '_' + network + '.png', normalize=False)
         del samples
 
-    
+    def evolution_PSNR(self):
+        samples_ULA_NF = torch.load(self.path + "samples/ULA_NF_Samples.pt").to(device)
+        samples_PnP_ULA = torch.load(self.path + "samples/PnP_ULA_Samples.pt").to(device)
+        print(  'shape of samples_ULA_NF ', samples_ULA_NF.shape)
+        print(  'shape of samples_PnP_ULA ', samples_PnP_ULA.shape)
+        samples_size_ULA_NF  = samples_ULA_NF.shape[0]
+        samples_size_PnP_ULA = samples_PnP_ULA.shape[0]
+
+        mmse_ULA_NF  = torch.mean(samples_ULA_NF[-10000:, :, :, :], dim = 0).unsqueeze(dim = 0)
+        mmse_PnP_ULA = torch.mean(samples_PnP_ULA[-10000:, :, :, :], dim = 0).unsqueeze(dim = 0)
+        evolution_PSNR_ULA_NF  = []
+        evolution_PSNR_PnP_ULA = []
+        for i in range(samples_size_ULA_NF):
+            evolution_PSNR_ULA_NF.append( psnr(samples_ULA_NF[i],  mmse_ULA_NF).cpu().detach().numpy() )
+
+        for i in range(samples_size_PnP_ULA):
+            evolution_PSNR_PnP_ULA.append(psnr(samples_PnP_ULA[i], mmse_PnP_ULA).cpu().detach().numpy())
+
+        evolution_PSNR_ULA_NF = np.array(evolution_PSNR_ULA_NF)
+        evolution_PSNR_PnP_ULA = np.array(evolution_PSNR_PnP_ULA)
+
+        import matplotlib.pyplot as plt
+        evolution_samples = min(samples_size_ULA_NF, samples_size_PnP_ULA)
+        x_axis = range(evolution_samples)
+        plt.xlabel('i')
+        plt.ylabel('PSNR(x_i, x_mmse)')
+        plt.plot(x_axis, evolution_PSNR_ULA_NF[:evolution_samples], color='r',marker='.',linestyle='-', linewidth=0.01)
+        plt.plot(x_axis, evolution_PSNR_PnP_ULA[:evolution_samples], color='b',marker='.',linestyle='-.', linewidth=0.01)
+        plt.legend(["NF-ULA", "PnP-ULA"], fontsize="20", loc ="lower right")
+        plt.savefig(self.path + '/PSNR_x_mmse.png')
+        plt.close()
+
+        # x_axis = np.arange(0, 600, 0.3)
+        # x_axis_PnP = np.arange(0, 450, 0.003)
+        # plt.xlabel('Time(seconds)')
+        # plt.ylabel('PSNR(x_i, x_mmse)')
+        # plt.plot(x_axis,     evolution_PSNR_ULA_NF[:2000], color='r',marker='.',linestyle='-', linewidth=0.01)
+        # plt.plot(x_axis_PnP, evolution_PSNR_PnP_ULA[:150000], color='b',marker='.',linestyle='-.', linewidth=0.01)
+        # plt.legend(["NF-ULA", "PnP-ULA"], fontsize="20", loc ="lower right")
+        # plt.savefig(self.path + '/PSNR_x_mmse_time.png')
+        # plt.close()
 
     def ACF(self, wavelet = False):
         dir = self.path + '/acf'
