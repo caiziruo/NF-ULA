@@ -11,7 +11,7 @@ import os
 import sys
 import os.path
 import math
-os.environ["CUDA_VISIBLE_DEVICES"] = "1, 2, 3, 7"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1, 3, 4, 5"
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
@@ -156,49 +156,46 @@ class ULA_NF(object):
     # def phi(self, x): return torch.sum( (self.A(x) - self.observation)**2 ) / (2.0 * self.noise_variance)
 
     def NF_Lipschitz_estimation(self, load_pt):
-        ###################################################################### Initialize the net
-        args = parser.parse_args()
-        print(args)
-        net_single = Glow(args.n_channel, args.n_flow, args.n_block, affine=args.affine, conv_lu=not args.no_lu)
-        net = nn.DataParallel(net_single)
-        net = net.to(device)
-        print("Load pt: ", load_pt)
-        net.load_state_dict(torch.load(load_pt))
-        net.eval()
-        print('#  parameters:', sum(param.numel() for param in net.parameters()))
+        if self.problem == 'deblurring' or self.problem == 'inpainting':
+            ###################################################################### Initialize the net
+            args = parser.parse_args()
+            print(args)
+            net = Glow(args.n_channel, args.n_flow, args.n_block, affine=args.affine, conv_lu=not args.no_lu)
+            net = nn.DataParallel(net)
+            net = net.to(device)
+            print("Load pt: ", load_pt)
+            net.load_state_dict(torch.load(load_pt))
+            net.eval()
+            print('#  parameters:', sum(param.numel() for param in net.parameters()))
 
-        def function_f(input, model):
-            model.zero_grad()
-            log_p, logdet, _ = model(input)
-            model.zero_grad()
-            gradients = torch.autograd.grad(outputs = log_p, inputs = input,
-                                grad_outputs = torch.ones(log_p.size(), device = input.device),
-                                create_graph = True, retain_graph = True, only_inputs = True)[0]
-            model.zero_grad()
-            return  gradients
-        
-        # def function_f(x, model):
-        #     y = x * x
-        #     gradients = torch.autograd.grad(outputs = y, inputs = x,
-        #                         grad_outputs = torch.ones(y.size(), device = x.device),
-        #                         create_graph = True, retain_graph = True, only_inputs = True)[0]
-        #     return  gradients
+            def function_f(input):
+                log_p, logdet, _ = net(input)
+                return  log_p
+            
+            for n in range(100):
+                X = torch.rand(1, self.channels, self.height, self.width ).to(device) - 0.5
+                ############################## For Glow-rosinality, input images should be in [-0.5, 0.5]
+                X = X.clone().detach().requires_grad_()
+                v = torch.rand(1, self.channels, self.height, self.width ).to(device)
+                u = torch.rand(1, self.channels, self.height, self.width ).to(device)
+                v /= torch.norm(v)
+                u /= torch.norm(u)
+                sn_previous = 0
 
-        for n in range(100):
-            random_walk = 0.02 * torch.randn( 1, self.channels, self.height, self.width ).to(device)
-            X = torch.rand(1, self.channels, self.height, self.width ).to(device) - 0.5
+                for iteration in range(50):
+                    v = torch.autograd.functional.hvp(function_f, X, v, create_graph=True)[1].clone().detach()
 
-            ############################## For Glow-rosinality, input images should be in [-0.5, 0.5]
-            X1 = X.clone().detach().requires_grad_()
-            X2 = X.clone().detach().requires_grad_()
-            # X2 = (X + random_walk).clone().detach().requires_grad_()
+                    sn = torch.sum(v*u)
+                    # print(n, iteration, sn)
+                    if torch.abs((sn - sn_previous) / sn_previous) < 1e-5:
+                        print(n, iteration, sn)
+                        break
+                    sn_previous = sn.clone()
 
-            Y1 = function_f(X1, net)
-            # Y2 = function_f(X1, net)
-            Y2 = function_f(X2, net)
-
-            print(   torch.norm(Y2 - Y1),  torch.norm(X2 - X1))
-
+                    v /= torch.norm(v)
+                    u = torch.autograd.functional.vhp(function_f, X, u, create_graph=True)[1].clone().detach()
+                    u /= torch.norm(u)
+                    # print(v.shape, u.shape, torch.norm(v), torch.norm(u))
 
     
     def ULA_NF_sample(self, start_from, save_samples, save_samples_size, load_pt):
