@@ -54,7 +54,7 @@ We use wavelet basis [pytorch_wavelets](https://github.com/fbcotter/pytorch_wave
 
 ## 2. USAGE AND EXAMPLES
 
-The algorithms NF-ULA and PnP-ULA using different networks are in the file `ULA_NF.py`. You can train the above mentioned normalizing flows or PnP denoisers by yourserf, or download the pre-trained models in the drive.
+The algorithms NF-ULA and PnP-ULA using different networks are in the file `ULA_NF.py`. You can train the above mentioned normalizing flows or PnP denoisers by yourserf, or download the pre-trained models in the [Google drive download link](https://drive.google.com/drive/folders/1-op8CJHA8ZAguFbxye-Vm05lQsqFabl3?usp=sharing).
 
 ### Deblurring
 
