@@ -11,7 +11,7 @@ import os
 import sys
 import os.path
 import math
-os.environ["CUDA_VISIBLE_DEVICES"] = "1, 3, 4, 5"
+os.environ["CUDA_VISIBLE_DEVICES"] = "4, 5, 6, 7"
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
