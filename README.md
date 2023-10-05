@@ -48,6 +48,7 @@ Some networks are using the codes from other repositories:
 - PatchNR from [PatchNR](https://github.com/FabianAltekrueger/patchNR),
 - RealSN-DnCNN from [Provable_Plug_and_Play](https://github.com/uclaopt/Provable_Plug_and_Play).
 
+Since the original realSN-DnCNN from [Provable_Plug_and_Play](https://github.com/uclaopt/Provable_Plug_and_Play) supports grayscale images by default and does not support 3-channels images, we made some small changes on it. The user can read `color_realSN-DnCNN.txt` to use or train realSN-DnCNN on 3-channels images.
 For CT, we use fan beam geometry implemented by [torch_radon](https://github.com/matteo-ronchetti/torch-radon).
 We use wavelet basis [pytorch_wavelets](https://github.com/fbcotter/pytorch_wavelets) and [statsmodels](https://pypi.org/project/statsmodels/) to calculate the autocorrelation function (ACF) of the samples.
 

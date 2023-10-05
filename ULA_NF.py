@@ -3,7 +3,7 @@ import numpy as np
 from math import sqrt
 from numpy.lib.function_base import gradient
 from scipy.ndimage import filters
-import cv2
+# import cv2
 import time
 import random
 from numpy import linalg as LA
@@ -13,7 +13,6 @@ import os.path
 import math
 os.environ["CUDA_VISIBLE_DEVICES"] = "4, 5, 6, 7"
 from tqdm import tqdm
-import numpy as np
 from PIL import Image
 from math import log, sqrt, pi
 import argparse
@@ -23,7 +22,6 @@ from torch.autograd import Variable, grad
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision import datasets, transforms, utils
-from glow_pytorch_rosinality.model import Glow
 from torch_radon import RadonFanbeam
 
 
@@ -42,7 +40,7 @@ parser.add_argument("--n_channel", default=3, type=int, help="channels of image"
 parser.add_argument("--img_size", default=128, type=int, help="image size")
 parser.add_argument("--temp", default=0.7, type=float, help="temperature of sampling")
 parser.add_argument("--n_sample", default=16, type=int, help="number of samples")
-parser.add_argument("--load_pt", default=212, type=int, help="load from checkpoint")
+
 
 def psnr(img1, img2):
     # img2: reference image
@@ -158,6 +156,7 @@ class ULA_NF(object):
     def NF_Lipschitz_estimation(self, load_pt):
         if self.problem == 'deblurring' or self.problem == 'inpainting':
             ###################################################################### Initialize the net
+            from glow_pytorch_rosinality.model import Glow
             args = parser.parse_args()
             print(args)
             net = Glow(args.n_channel, args.n_flow, args.n_block, affine=args.affine, conv_lu=not args.no_lu)
@@ -206,6 +205,7 @@ class ULA_NF(object):
         
         ###################################################################### Initialize the net
         if self.problem == 'deblurring' or self.problem == 'inpainting':
+            from glow_pytorch_rosinality.model import Glow
             args = parser.parse_args()
             print(args)
             net_single = Glow(args.n_channel, args.n_flow, args.n_block, affine=args.affine, conv_lu=not args.no_lu)
