@@ -16,7 +16,10 @@ Please contact Ziruo Cai (ziruocai@gmail.com) for any issues or bug reports.
 
 ## 1. REQUIREMENTS
 
-The code requires several Python packages. We tested the code with Python 3.9.16 and the following package versions:
+The code requires several Python packages. If you use conda, you can  import from `NFULA.yaml` to create a new conda env:  
+`conda env create -n NFULA --file NFULA.yml`, or install the packages one by one.
+
+We tested the code with Python 3.9.16 and the following package versions:
 
 - numpy                     1.24.1
 - scipy                     1.10.0
